@@ -18,8 +18,8 @@ class SaleFactory extends Factory
     public function definition(): array
     {
         return [
-            'seller_id' => $this->faker->numberBetween(1, 100),
-            'client_id' => $this->faker->numberBetween(1, 100),
+            'seller_id' => \App\Models\Seller::factory(),
+            'client_id' => \App\Models\Client::factory(),
             'sold_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'total_amount' => $this->faker->numberBetween(10000, 50000),
             'status' => $this->faker->randomElement(Status::cases()),

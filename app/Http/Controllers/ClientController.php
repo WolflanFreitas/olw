@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use Illuminate\Support\Facades\DB;
 use App\Models\Client;
 
 class ClientController extends Controller
@@ -13,7 +14,8 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return view('clients.index');
+        $clients = \App\Models\Client::paginate(10);
+        return view('clients.index', compact('clients'));
     }
 
     /**
@@ -21,7 +23,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        //
+        return view('clients.create');
     }
 
     /**
@@ -29,7 +31,18 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
-        //
+        DB::transaction(function () use ($request) {
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]);
+            $user->client()->create([
+                'address_id' => $request->address_id,
+            ]);
+        });
+
+        return redirect()->route('clients.index');
     }
 
     /**
@@ -45,7 +58,7 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        //
+        return view('clients.edit', compact('client'));
     }
 
     /**
@@ -53,7 +66,17 @@ class ClientController extends Controller
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        //
+        DB::transaction(function () use ($request, $client) {
+            $client->user()->update([
+                'name' => $request->name,
+                'email' => $request->email,
+            ]);
+            $client->update([
+                'address_id' => $request->address_id,
+            ]);
+        });
+
+        return redirect()->route('clients.index');
     }
 
     /**
